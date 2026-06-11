@@ -1204,15 +1204,7 @@ namespace reg
                 DWORD local_disposition{0};
                 const auto hr = HRESULT_FROM_WIN32(
                     ::RegCreateKeyExW(
-                        m_key,
-                        subKey,
-                        zero_reserved,
-                        null_class,
-                        get_options_flags(options),
-                        access.value,
-                        null_security_attributes,
-                        hkey,
-                        &local_disposition));
+                        m_key, subKey, zero_reserved, null_class, get_options_flags(options), access.value, null_security_attributes, hkey, &local_disposition));
                 if (disposition && SUCCEEDED(hr))
                 {
                     *disposition = (local_disposition == REG_CREATED_NEW_KEY) ? ::wil::reg::key_disposition::created_new

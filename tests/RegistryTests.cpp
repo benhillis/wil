@@ -6901,4 +6901,3 @@ TEST_CASE("BasicRegistryTests::key_heap_string_nothrow_iterator", "[registry]")
         REQUIRE(count == 4);
     }
 }
-
