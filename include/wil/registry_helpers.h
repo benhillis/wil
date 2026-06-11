@@ -143,6 +143,25 @@ namespace reg
         opened_existing,
     };
 
+    // Options that control how a registry key is opened. These map to the ulOptions parameter of RegOpenKeyExW and can be
+    // combined with the bitwise OR operator. See https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regopenkeyexw.
+    enum class open_options : DWORD
+    {
+        // No options; open the key normally (ulOptions == 0).
+        none = 0,
+
+        // Open the symbolic link key itself rather than its target (REG_OPTION_OPEN_LINK).
+        open_link = REG_OPTION_OPEN_LINK,
+
+        // Open the key using the caller's backup/restore privileges, ignoring the requested access (REG_OPTION_BACKUP_RESTORE).
+        backup_restore = REG_OPTION_BACKUP_RESTORE,
+
+        // Do not apply registry virtualization when opening the key (REG_OPTION_DONT_VIRTUALIZE).
+        dont_virtualize = REG_OPTION_DONT_VIRTUALIZE,
+    };
+
+    DEFINE_ENUM_FLAG_OPERATORS(open_options);
+
     /// @cond
     namespace reg_view_details
     {
@@ -1161,10 +1180,13 @@ namespace reg
             reg_view_t& operator=(reg_view_t&&) = delete;
 
             typename err_policy::result open_key(
-                _In_opt_ PCWSTR subKey, _Out_ HKEY* hkey, ::wil::reg::access_mask access = ::wil::reg::key_access::read) const
+                _In_opt_ PCWSTR subKey,
+                _Out_ HKEY* hkey,
+                ::wil::reg::access_mask access = ::wil::reg::key_access::read,
+                ::wil::reg::open_options options = ::wil::reg::open_options::none) const
             {
-                constexpr DWORD zero_options{0};
-                return err_policy::HResult(HRESULT_FROM_WIN32(::RegOpenKeyExW(m_key, subKey, zero_options, access.value, hkey)));
+                return err_policy::HResult(
+                    HRESULT_FROM_WIN32(::RegOpenKeyExW(m_key, subKey, static_cast<DWORD>(options), access.value, hkey)));
             }
 
             typename err_policy::result create_key(
